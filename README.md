@@ -1,9 +1,56 @@
-import inspect
+# Markdownista
+ 
+**Markdownista** writes *Markdown*.
+ 
+|Who|Does what|
+|---|---|
+|Barista|Makes coffee|
+|Markdownista|Writes markdown|
 
+You can use `with` to keep using the table and have it end automatically.
+ 
+|Number|Square|Cube|
+|---|---|---|
+|0|0|0|
+|1|1|1|
+|2|4|8|
+|3|9|27|
+|4|16|64|
+
+# Customization
+ 
+## Syntax
+ 
+You can swap out the syntax you're using.
+ 
+```python3
+from markdownista.writer import MdWriter
+from markdownista.syntax import ConfluenceMarkdownSyntax
+
+md = MdWriter(syntax=ConfluenceMarkdownSyntax())
+```
+
+## Output
+ 
+You can swap out the output as well.
+ 
+```python3
 from markdownista.writer import MdWriter
 from markdownista.output import BufferedOutput
 
+output = BufferedOutput()
+md = MdWriter(output=output)
 
+# write some stuff
+
+output.print()              # print to the console
+with open("README.md", "w") as file:
+    output.print(file=file) # or to a file
+```
+
+# How it's done
+ 
+```python3
 def demo(md):
     md.heading("Markdownista")
 
@@ -56,11 +103,5 @@ with open("README.md", "w") as file:
     demo_code = inspect.getsource(demo)
     md.write(md.syntax.code_block(text=demo_code, language="python3"))
 
+```
 
-output = BufferedOutput()
-demo(MdWriter(output=output))
-output.print()
-
-# Have you ever seen a project used to write it's own readme? Now that's dogfooding!
-with open("README.md", "w") as file:
-    output.print(file=file)
