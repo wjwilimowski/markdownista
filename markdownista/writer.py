@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from markdownista.output import Output, PrintOutput
+from markdownista.syntax import MarkdownSyntax
 
 
 class TableMdWriter:
-    def __init__(self, *, output: Output = None):
+    def __init__(self, *, output: Output = None, syntax: MarkdownSyntax = None):
         self.output = output or PrintOutput()
+        self.syntax = syntax or MarkdownSyntax()
 
     def __enter__(self):
         return self
@@ -13,18 +15,14 @@ class TableMdWriter:
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    @staticmethod
-    def _table_row(items):
-        return "|" + "|".join([(str(i) if i is not None else " ") for i in items]) + "|"
-
     def header(self, header) -> TableMdWriter:
-        self.row(header)
-        self.row(["---" for _ in header])
+        for row in self.syntax.table_header(header):
+            self.output.write(row)
 
         return self
 
     def row(self, row):
-        self.output.write(self._table_row(row))
+        self.output.write(self.syntax.table_row(row))
 
     def rows(self, rows, *, header=False) -> TableMdWriter:
         if header:
@@ -42,22 +40,17 @@ class TableMdWriter:
 
 
 class MdWriter:
-    def __init__(self, *, output: Output = None):
+    def __init__(self, *, output: Output = None, syntax: MarkdownSyntax = None):
         self.output = output or PrintOutput()
-
-    def write(self, line):
-        self.output.write(line)
+        self.syntax = syntax or MarkdownSyntax()
+        self.write = self.output.write
 
     def br(self):
         self.write(" ")
 
-    @staticmethod
-    def _create_heading(title, *, depth=1):
-        return f"{'#' * depth} {title}"
-
-    def heading(self, title, *, depth=1):
-        self.write(self._create_heading(title, depth=depth))
+    def heading(self, title, *, level=1):
+        self.write(self.syntax.heading(title, level=level))
         self.br()
 
     def table(self) -> TableMdWriter:
-        return TableMdWriter(output=self.output)
+        return TableMdWriter(output=self.output, syntax=self.syntax)
