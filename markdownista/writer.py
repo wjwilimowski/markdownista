@@ -8,21 +8,25 @@ class TableMdWriter:
     def __init__(self, *, output: Output = None, syntax: MarkdownSyntax = None):
         self.output = output or PrintOutput()
         self.syntax = syntax or MarkdownSyntax()
+        self.write = self.output.write
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
+        self.end()
+
+    def end(self) -> None:
+        self.write("")
 
     def header(self, header) -> TableMdWriter:
         for row in self.syntax.table_header(header):
-            self.output.write(row)
+            self.write(row)
 
         return self
 
     def row(self, row):
-        self.output.write(self.syntax.table_row(row))
+        self.write(self.syntax.table_row(row))
 
     def rows(self, rows, *, header=False) -> TableMdWriter:
         if header:
@@ -47,6 +51,10 @@ class MdWriter:
 
     def br(self):
         self.write(" ")
+
+    def paragraph(self, text):
+        self.write(text)
+        self.br()
 
     def heading(self, title, *, level=1):
         self.write(self.syntax.heading(title, level=level))

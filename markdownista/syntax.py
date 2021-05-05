@@ -1,5 +1,3 @@
-from abc import ABC
-
 DEFAULT_NEWLINE = "\n"
 
 _table_separator = "|"
@@ -13,8 +11,20 @@ class MarkdownSyntax:
     def code(text: str) -> str:
         return f"`{text}`"
 
-    def code_block(self, text: str, *, language: str = None) -> str:
-        return "```" + language + self._newline + text + self._newline + "```"
+    def code_block(self, *, text=None, lines=None, language: str = None) -> str:
+        if text is None and lines is None or text is not None and lines is not None:
+            raise ValueError("Provide either text or lines for code_block")
+
+        if lines is not None:
+            text = self._newline.join(lines)
+
+        return self._begin_code_block(language) + text + self._end_code_block()
+
+    def _begin_code_block(self, language: str):
+        return f"```{language}" + self._newline
+
+    def _end_code_block(self):
+        return self._newline + "```" + self._newline
 
     @staticmethod
     def bold(text: str) -> str:
@@ -22,7 +32,7 @@ class MarkdownSyntax:
 
     @staticmethod
     def italic(text: str) -> str:
-        return f"**{text}**"
+        return f"*{text}*"
 
     @staticmethod
     def heading(text: str, *, level=1) -> str:
@@ -56,8 +66,11 @@ class ConfluenceMarkdownSyntax(MarkdownSyntax):
     def code(text: str) -> str:
         return "{{" + text + "}}"
 
-    def code_block(self, text: str, *, language: str = None) -> str:
-        return "{code}" + text + "{code}"
+    def _begin_code_block(self, language: str):
+        return "{code}"
+
+    def _end_code_block(self):
+        return "{code}"
 
     @staticmethod
     def bold(text: str) -> str:
