@@ -42,6 +42,10 @@ class TableMdWriter:
         rows = [line.split(separator) for line in csv_lines]
         return self.rows(rows, header=header)
 
+    def from_dataframe(self, df, *, header=None):
+        header = header or df.columns
+        return self.header(header).rows(df.values.tolist())
+
 
 class MdWriter:
     def __init__(self, *, output: Output = None, syntax: MarkdownSyntax = None):

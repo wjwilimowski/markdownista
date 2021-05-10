@@ -62,6 +62,10 @@ class MarkdownSyntax:
 
 
 class ConfluenceMarkdownSyntax(MarkdownSyntax):
+    def __init__(self, *, bold_table_headers=False):
+        super().__init__()
+        self.bold_table_headers = bold_table_headers
+
     @staticmethod
     def code(text: str) -> str:
         return "{{" + text + "}}"
@@ -84,6 +88,6 @@ class ConfluenceMarkdownSyntax(MarkdownSyntax):
     def heading(text: str, *, level=1) -> str:
         return f"h{level}. {text}"
 
-    @classmethod
-    def table_header(cls, fields: []):
-        yield cls.table_row(fields)
+    def table_header(self, fields: []):
+        header = [self.bold(f) for f in fields] if self.bold_table_headers else fields
+        yield self.table_row(header)
